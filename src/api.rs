@@ -8,6 +8,8 @@ use axum::{
 
 use serde::Serialize;
 
+pub type ApiResponse<T> = Result<AppJson<BaseResponse<T>>, AppError>;
+
 #[derive(FromRequest)]
 #[from_request(via(axum::Json), rejection(AppError))]
 pub struct AppJson<T>(pub T);
@@ -32,12 +34,12 @@ impl<T> BaseResponse<T>
 where
     T: Serialize,
 {
-    pub fn success(data: Option<T>) -> Self {
-        Self {
+    pub fn success(data: Option<T>) -> AppJson<Self> {
+        AppJson(Self {
             success: true,
             message: "success".to_owned(),
             data: data,
-        }
+        })
     }
 }
 
