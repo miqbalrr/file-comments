@@ -83,7 +83,6 @@ pub async fn create_comment(state: State<AppState>, req: Json<CreateComment>) ->
         .await
         .insert_to_file(&filepath, &req.message)?;
 
-    sleep(Duration::from_secs(10)).await;
     Ok(BaseResponse::success(None))
 }
 
