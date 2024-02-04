@@ -4,7 +4,7 @@ mod handler;
 use std::{sync::Arc, time::Duration};
 
 use axum::{
-    http::StatusCode,
+    http::{HeaderValue, StatusCode},
     response::IntoResponse,
     routing::{delete, get, post},
     Router,
@@ -14,8 +14,8 @@ use tokio::{
     signal,
     sync::{Mutex, RwLock},
 };
-use tower_http::timeout::TimeoutLayer;
-use tower_http::trace::TraceLayer;
+use tower_http::{cors::Any, trace::TraceLayer};
+use tower_http::{cors::CorsLayer, timeout::TimeoutLayer};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 #[tokio::main]
@@ -42,7 +42,13 @@ async fn main() {
             TimeoutLayer::new(Duration::from_secs(10)),
         ))
         .fallback(handler_404)
-        .with_state(state);
+        .with_state(state)
+        .layer(
+            CorsLayer::new()
+                .allow_headers(Any)
+                .allow_methods(Any)
+                .allow_origin(Any),
+        );
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app)
